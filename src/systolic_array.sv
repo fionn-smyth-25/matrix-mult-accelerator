@@ -6,7 +6,8 @@ module systolic_array
     input clk, rst, en,
     input[63:0] i_north[N-1:0],
     input[63:0] i_west[N-1:0],
-    output reg done  
+    output reg done,
+    output reg[63:0] result[5 * (N - 1):0]
 );
     
     localparam MAX = 5 * (N - 1); //max amount of proccessing elements required
@@ -15,7 +16,6 @@ module systolic_array
     reg[3:0] count;
     wire[63:0] o_east[0:MAX];
     wire[63:0] o_south[0:MAX];
-    wire[63:0] result[0:MAX];
     
     genvar r, c;
     
@@ -38,6 +38,9 @@ module systolic_array
         if (rst) begin
             done <= 0;
             count <= 0;
+            for (int i = 0; i < MAX; i++) begin
+                result[i] <= 0;
+            end          
         end
         else if (en) begin
             done <= 0;
