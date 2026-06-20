@@ -38,7 +38,7 @@ module systolic_array
         if (rst) begin
             done <= 0;
             count <= 0;
-            for (int i = 0; i < MAX; i++) begin
+            for (int i = 0; i <= MAX; i++) begin
                 result[i] <= 0;
             end          
         end
