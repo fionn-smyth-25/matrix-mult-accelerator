@@ -1,6 +1,6 @@
 # Introduction
 ---
-This design implements a matrix multiplier matrix multiplication accelerator using systolic arrays. Systolic arrays take advantage of parallel processing which greatly reduces the number of operations required to perform matrix multiplication. The design is fully parameterised and the user is able to adjust the matrix size and the data width. 
+This design implements a matrix multiplication accelerator using systolic arrays. Systolic arrays take advantage of parallel processing which greatly reduces the number of operations required to perform matrix multiplication. The design is fully parameterised and the user is able to adjust the matrix size and the data width. 
 ## What are systolic arrays?
 A systolic array is an array of processing elements. Each element is connected in a grid and performs some computation based on the data received from its neighbours. It stores the result within itself. In this case, the processing elements consist of multiply accumulate (MAC) modules.
 
