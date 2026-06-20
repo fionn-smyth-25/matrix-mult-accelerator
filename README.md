@@ -4,7 +4,8 @@ This design implements a matrix multiplier matrix multiplication accelerator usi
 ## What are systolic arrays?
 A systolic array is an array of processing elements. Each element is connected in a grid and performs some computation based on the data received from its neighbours. It stores the result within itself. In this case, the processing elements consist of multiply accumulate (MAC) modules.
 
-![systolic_array](https://github.com/fionn-smyth-25/matrix-mult-accelerator/tree/main/images/systolic_array.png)
+![systolic array](images/systolic_array.png)
+
 *An example of a 4 x 4 systolic array - note how inputs are received from the north and west and outputs are sent to the south and east*
 
 
