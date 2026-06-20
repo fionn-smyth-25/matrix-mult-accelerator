@@ -55,7 +55,7 @@ module accelerator
                 end
                 for (int c = 0; c < N; c++) begin
                     if ((cycle >= c) && ((cycle - c) < N)) begin
-                        north_wires[c] <= a[(cycle-c)*N + c];
+                        north_wires[c] <= b[(cycle-c)*N + c];
                     end
                     else begin
                         north_wires[c] <= 64'b0;
