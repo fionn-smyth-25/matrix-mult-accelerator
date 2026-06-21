@@ -1,14 +1,15 @@
 `timescale 1ns / 1ps
 
 module processing_element
+#(parameter DATA_WIDTH = 64)
 (
     input clk, rst, en,
-    input[63:0] i_north, i_west,
-    output reg[63:0] o_east, o_south, 
-    output reg[63:0] result
+    input[DATA_WIDTH-1:0] i_north, i_west,
+    output reg[DATA_WIDTH-1:0] o_east, o_south, 
+    output reg[2*DATA_WIDTH:0] result
 );
 
-    wire[127:0] acc;
+    wire[2*DATA_WIDTH:0] acc;
     
     assign acc = i_north * i_west;
             

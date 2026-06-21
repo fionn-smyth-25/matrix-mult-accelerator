@@ -2,22 +2,23 @@
 
 module accelerator_tb;
 
-    parameter N = 4;
-    parameter MAX = 5 * (N - 1); //max amount of proccessing elements required
+    parameter N = 7;
+    parameter DATA_WIDTH = 10;
+    parameter MAX = (N*N)-1; //max amount of proccessing elements required
     logic clk, rst, ready, finished;
-    logic[63:0] a[MAX:0];
-    logic[63:0] b[MAX:0]; 
-    logic[63:0] result[MAX:0];
-    logic[63:0] r[MAX:0];
+    logic[DATA_WIDTH-1:0] a[MAX:0];
+    logic[DATA_WIDTH-1:0] b[MAX:0]; 
+    logic[2*DATA_WIDTH:0] result[MAX:0];
+    logic[2*DATA_WIDTH:0] r[MAX:0];
     
     //----------Helper Functions----------
     task automatic mult_ref
     (
-        input logic[63:0] x[MAX:0],
-        input logic[63:0] y[MAX:0],
-        output logic[63:0] z[MAX:0]
+        input logic[DATA_WIDTH-1:0] x[MAX:0],
+        input logic[DATA_WIDTH-1:0] y[MAX:0],
+        output logic[2*DATA_WIDTH:0] z[MAX:0]
     );
-        logic[63:0] sum;
+        logic[2*DATA_WIDTH:0] sum;
         for (int i = 0; i < N; i++) begin
             for (int j = 0; j < N; j++) begin
                 sum = 0;
@@ -32,8 +33,8 @@ module accelerator_tb;
     
     task automatic cmp_mat
     (
-        input logic[63:0] x[MAX:0],
-        input logic[63:0] y[MAX:0]
+        input logic[2*DATA_WIDTH:0] x[MAX:0],
+        input logic[2*DATA_WIDTH:0] y[MAX:0]
     );
         for (int i = 0; i <= MAX; i++) begin
             if (x[i] !== y[i]) $display("Mismatch at %0d: expected=%0d got=%0d", i, x[i], y[i]);
@@ -41,9 +42,18 @@ module accelerator_tb;
         end
     endtask
     
+    task automatic fill_mat_rand
+    (
+        output logic[DATA_WIDTH-1:0] x[MAX:0]
+    );
+        for (int i = 0; i <= MAX; i++) begin
+            x[i] = $urandom_range(1000, 900);
+        end
+    endtask  
     //------------------------------------
 
-    accelerator #(N) uut (.clk(clk), .rst(rst), .ready(ready),
+    accelerator #(N, (N*N), (3*N) - 2, DATA_WIDTH)  
+     uut (.clk(clk), .rst(rst), .ready(ready),
                      .a(a), 
                      .b(b), 
                      .result(result),
@@ -62,16 +72,8 @@ module accelerator_tb;
     initial begin
         //init
         ready = 1'b0;
-        for (int i = 0; i < MAX + 1; i++) begin
-            if (i < 4 && i > 0) begin
-                a[i] = a[i - 1] - 1;
-                b[i] = b[i - 1] - 1;
-            end
-            else begin
-            a[i] = 64'b11;
-            b[i] = 64'b11;
-            end
-        end
+        fill_mat_rand(a);
+        fill_mat_rand(b);
         
         //rst high for 2 clk cycles
         rst = 1'b1;

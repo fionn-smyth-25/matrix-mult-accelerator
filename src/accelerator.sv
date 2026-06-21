@@ -1,24 +1,27 @@
 `timescale 1ns / 1ps
 
 module accelerator
-#(parameter N = 4) //N X N grid of processing elements
+#(parameter N = 4, //N X N grid of processing elements
+  parameter MAX = N*N, //Number of processing elements required
+  parameter CYCLES = (3*N) - 2, //MAC operations required
+  parameter DATA_WIDTH = 64) 
 (
     input clk, rst, ready,
-    input[63:0] a[5 * (N - 1):0], 
-    input[63:0] b[5 * (N - 1):0], 
-    output[63:0] result[5 * (N - 1):0],
+    input[DATA_WIDTH-1:0] a[MAX-1:0], 
+    input[DATA_WIDTH-1:0] b[MAX-1:0], 
+    output[2*DATA_WIDTH:0] result[MAX-1:0],
     output finished
 );
 
     wire en, done;
-    reg[63:0] north_wires[N-1:0];
-    reg[63:0] west_wires[N-1:0];
+    reg[DATA_WIDTH-1:0] north_wires[N-1:0];
+    reg[DATA_WIDTH-1:0] west_wires[N-1:0];
     
     assign finished = done;
     
-    localparam CYCLES = (3 * N) - 2; //MAC operations required
 
-    systolic_array #(N) s_arr (.clk(clk), .rst(rst), .en(en),
+    systolic_array #(N, MAX, CYCLES, DATA_WIDTH) 
+                        s_arr (.clk(clk), .rst(rst), .en(en),
                                .i_north(north_wires),
                                .i_west(west_wires),
                                .done(done),
@@ -33,15 +36,15 @@ module accelerator
         if (rst) begin
             cycle <= 0;
             for (int i = 0; i < N; i++) begin
-                north_wires[i] <= 64'b0;
-                west_wires[i] <= 64'b0;
+                north_wires[i] <= 0;
+                west_wires[i] <= 0;
             end     
         end
         else if (ready) begin
             if (cycle == CYCLES) begin
                 for (int i = 0; i < N; i++) begin
-                    north_wires[i] <= 64'b0;
-                    west_wires[i] <= 64'b0;
+                    north_wires[i] <= 0;
+                    west_wires[i] <= 0;
                 end      
             end
             else begin
@@ -50,7 +53,7 @@ module accelerator
                         west_wires[r] <= a[r*N + (cycle-r)];
                     end
                     else begin
-                        west_wires[r] <= 64'b0;
+                        west_wires[r] <= 0;
                     end                    
                 end
                 for (int c = 0; c < N; c++) begin
@@ -58,7 +61,7 @@ module accelerator
                         north_wires[c] <= b[(cycle-c)*N + c];
                     end
                     else begin
-                        north_wires[c] <= 64'b0;
+                        north_wires[c] <= 0;
                     end     
                 end
                 

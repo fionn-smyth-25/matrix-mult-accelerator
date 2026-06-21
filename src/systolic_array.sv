@@ -1,21 +1,21 @@
 `timescale 1ns / 1ps
 
 module systolic_array
-#(parameter N = 4) //N X N grid of processing elements
+#(parameter N = 4, //N X N grid of processing elements
+  parameter MAX = N*N, //Number of processing elements required
+  parameter CYCLES = (3*N) - 2, //MAC operations required
+  parameter DATA_WIDTH = 64) 
 (
     input clk, rst, en,
-    input[63:0] i_north[N-1:0],
-    input[63:0] i_west[N-1:0],
+    input[DATA_WIDTH-1:0] i_north[N-1:0],
+    input[DATA_WIDTH-1:0] i_west[N-1:0],
     output reg done,
-    output reg[63:0] result[5 * (N - 1):0]
+    output reg[2*DATA_WIDTH:0] result[MAX-1:0]
 );
-    
-    localparam MAX = 5 * (N - 1); //max amount of proccessing elements required
-    localparam CYCLES = (3 * N) - 2; //MAC operations required
 
-    reg[3:0] count;
-    wire[63:0] o_east[MAX:0];
-    wire[63:0] o_south[MAX:0];
+    reg[$clog2(2*N):0] count;
+    wire[DATA_WIDTH-1:0] o_east[MAX-1:0];
+    wire[DATA_WIDTH-1:0] o_south[MAX-1:0];
     
     genvar r, c;
     
@@ -26,8 +26,9 @@ module systolic_array
                 localparam idx = (r * N) + c; 
 
                 //handle corner/edge logic
-                processing_element pe_inst (.clk(clk), .rst(rst), .en(en),
-                                            .i_north((r == 0) ? i_north[c] : o_south[idx - 4]),
+                processing_element #(DATA_WIDTH) 
+                                    pe_inst (.clk(clk), .rst(rst), .en(en),
+                                            .i_north((r == 0) ? i_north[c] : o_south[idx - N]),
                                             .i_west ((c == 0) ? i_west[r]   : o_east[idx - 1]),
                                             .o_east(o_east[idx]), .o_south(o_south[idx]), .result(result[idx]));             
             end
@@ -38,7 +39,7 @@ module systolic_array
         if (rst) begin
             done <= 0;
             count <= 0;
-            for (int i = 0; i <= MAX; i++) begin
+            for (int i = 0; i < MAX; i++) begin
                 result[i] <= 0;
             end          
         end
